@@ -5,6 +5,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NamedQuery(name="User.findByEmailID",query = "select u from User u where u.email=:email")
 @Data
@@ -37,6 +38,7 @@ public class User {
 
     @Column(name = "role")
     private String role;
+
 
 //    public void setId(Long id) {
 //        this.id = id;

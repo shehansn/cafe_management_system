@@ -42,6 +42,6 @@ public class UserControllerImpl implements UserController {
             ex.printStackTrace();
         }
         //return new ResponseEntity<String>("{\"Message \":\"Error Occured In signup\"}", HttpStatus.INTERNAL_SERVER_ERROR)
-        return Utils.getResponseEntity("Error Occured In SignUp", HttpStatus.INTERNAL_SERVER_ERROR);
+        return Utils.getResponseEntity("Error Occured In Login", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
