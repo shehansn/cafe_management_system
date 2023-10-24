@@ -13,6 +13,7 @@ public interface UserController {
 
     @PostMapping(path = "/signUp2")
     public ResponseEntity<String> signUp2(@RequestBody(required = true) Map<String,String> requestMapping);
+
     @PostMapping(path = "/login")
     public ResponseEntity<String> login(@RequestBody(required = true) Map<String,String> requestMapping);
 
