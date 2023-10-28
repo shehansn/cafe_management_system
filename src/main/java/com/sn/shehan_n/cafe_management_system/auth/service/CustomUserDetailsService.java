@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Slf4j
 @Service
-public class CustomUserDetailsService implements UserDetailsService{
+public class CustomUserDetailsService implements UserDetailsService {
 
 
     @Autowired
@@ -33,6 +33,9 @@ public class CustomUserDetailsService implements UserDetailsService{
     }
 
     public com.sn.shehan_n.cafe_management_system.entity.User getUserDetails() {
+//        com.sn.shehan_n.cafe_management_system.entity.User user = userDetail;
+//        user.setPassword(null);
+//        return user;
         return userDetail;
     }
 }

@@ -5,8 +5,14 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NamedQuery(name="User.findByEmailID",query = "select u from User u where u.email=:email")
+@NamedQuery(name="User.getAllUsers",query = "select new com.sn.shehan_n.cafe_management_system.wrapper.UserWrapper(u.id,u.name,u.contactNumber,u.email,u.status) from User u where u.role='user'")
+@NamedQuery(name="User.updateStatus",query = "update User u set u.status=:status where u.id=:id")
+@NamedQuery(name="User.getAllAdmins",query = "select u.email from User u where u.role='admin'")
+
+
 @Data
 @Entity
 @DynamicUpdate
@@ -37,6 +43,7 @@ public class User {
 
     @Column(name = "role")
     private String role;
+
 
 //    public void setId(Long id) {
 //        this.id = id;
