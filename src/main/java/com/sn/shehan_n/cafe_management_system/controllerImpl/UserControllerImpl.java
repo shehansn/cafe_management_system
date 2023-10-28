@@ -88,7 +88,8 @@ public class UserControllerImpl implements UserController {
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return null;
+        return Utils.getResponseEntity(Constants.UNABLE_TO_CHANGE_PASSWORD,HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 
 
