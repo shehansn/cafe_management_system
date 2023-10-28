@@ -1,12 +1,15 @@
 package com.sn.shehan_n.cafe_management_system.serviceImpl;
 
+import com.sn.shehan_n.cafe_management_system.auth.filter.TokenAuthenticationFilter;
 import com.sn.shehan_n.cafe_management_system.auth.service.CustomUserDetailsService;
 import com.sn.shehan_n.cafe_management_system.auth.util.JwtUtil;
 import com.sn.shehan_n.cafe_management_system.commons.constants.Constants;
 import com.sn.shehan_n.cafe_management_system.commons.util.Utils;
+import com.sn.shehan_n.cafe_management_system.email.Utils.EmailUtils;
 import com.sn.shehan_n.cafe_management_system.entity.User;
 import com.sn.shehan_n.cafe_management_system.repository.UserRepository;
 import com.sn.shehan_n.cafe_management_system.service.UserService;
+import com.sn.shehan_n.cafe_management_system.wrapper.UserWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -34,15 +34,19 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    private final EmailUtils emailUtils;
 
     public UserServiceImpl(UserRepository userRepository,
                            AuthenticationManager authenticationManager,
                            CustomUserDetailsService customUserDetailsService,
-                           JwtUtil jwtUtil) {
+                           JwtUtil jwtUtil, TokenAuthenticationFilter tokenAuthenticationFilter, EmailUtils emailUtils) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.customUserDetailsService = customUserDetailsService;
         this.jwtUtil = jwtUtil;
+        this.tokenAuthenticationFilter = tokenAuthenticationFilter;
+        this.emailUtils = emailUtils;
     }
 
     @Override
@@ -89,12 +93,12 @@ public class UserServiceImpl implements UserService {
                 if (auth.isAuthenticated()) {
                     if (customUserDetailsService.getUserDetails().getStatus().equalsIgnoreCase("true")) {
 
-                        return new ResponseEntity<String>("{\"token\":\" " +
+                        return new ResponseEntity<String>("{ \"token\":\"" +
                                 jwtUtil.generateToken(customUserDetailsService.getUserDetails().getEmail(),
                                         customUserDetailsService.getUserDetails().getRole()) + "\"}", HttpStatus.OK);
 
                     } else {
-                        return Utils.getResponseEntity(Constants.NOT_APPROVED,HttpStatus.LOCKED);
+                        return Utils.getResponseEntity(Constants.NOT_APPROVED, HttpStatus.LOCKED);
 //                        return new ResponseEntity<String>("{ \"message \" : \" " + "Wait for Admin Approvals." + " \" }", HttpStatus.BAD_REQUEST);
 
                     }
@@ -143,6 +147,89 @@ public class UserServiceImpl implements UserService {
 //            ex.printStackTrace();
 //        }
 //        return Utils.getResponseEntity("Authentication failed",HttpStatus.BAD_REQUEST);
+
+    }
+
+    @Override
+    public ResponseEntity<List<UserWrapper>> getAllUsers() {
+        try {
+            if (tokenAuthenticationFilter.isAdmin()) {
+
+                return new ResponseEntity<>(userRepository.getAllUsers(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> update(Map<String, String> requestData) {
+        try {
+            //tokenAuthenticationFilter.isUser() ||
+            if (tokenAuthenticationFilter.isAdmin()) {
+                Optional<User> foundUser = userRepository.findById(Integer.parseInt(requestData.get("id")));
+                String foundStatus = String.valueOf(foundUser.get().getStatus());
+                //!foundUser.isEmpty
+                if (foundUser.isPresent()) {
+                    userRepository.updateStatus(requestData.get("status"), Integer.parseInt(requestData.get("id")));
+                    String userEmail = foundUser.get().getEmail();
+                    String status = requestData.get("status");
+                    List<String> listOfEmails = userRepository.getAllAdmins();
+                    sendMailToAllAdmins(status, userEmail, listOfEmails);
+
+                    return Utils.getResponseEntity("USER STATUS UPDATE SUCCESSFULLY", HttpStatus.OK);
+
+                } else {
+                    return Utils.getResponseEntity("USER ID DOESNT EXISTS", HttpStatus.OK);
+                }
+            } else {
+                return Utils.getResponseEntity(Constants.UNAUTHERIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return Utils.getResponseEntity(Constants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> checkToken() {
+        return Utils.getResponseEntity("true", HttpStatus.OK);
+//        try {
+//            return Utils.getResponseEntity("true", HttpStatus.OK);
+//
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        return Utils.getResponseEntity(Constants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> changePassword(Map<String, String> requestdata) {
+        try {
+
+        }catch (Exception ex){
+
+        }
+        return null;
+    }
+
+    private void sendMailToAllAdmins(String status, String userEmail, List<String> allAdmins) {
+        log.info(status + userEmail + allAdmins);
+        String currentUserEmail = tokenAuthenticationFilter.getCurrentUser();
+        allAdmins.remove(currentUserEmail);
+        log.info("after removing current user" + allAdmins);
+
+        if (status != null && status.equalsIgnoreCase("true")) {
+
+            emailUtils.sendSimpleMessage(currentUserEmail, "Account Approved", "USER : " + userEmail + "\n is Approved By ADMIN :" + currentUserEmail, allAdmins);
+
+        } else {
+            emailUtils.sendSimpleMessage(currentUserEmail, "Account Disabled", "USER : " + userEmail + "\n is Disabled. Send for ADMIN Approvals", allAdmins);
+
+        }
 
     }
 
