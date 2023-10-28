@@ -1,5 +1,6 @@
 package com.sn.shehan_n.cafe_management_system.serviceImpl;
 
+import com.google.common.base.Strings;
 import com.sn.shehan_n.cafe_management_system.auth.filter.TokenAuthenticationFilter;
 import com.sn.shehan_n.cafe_management_system.auth.service.CustomUserDetailsService;
 import com.sn.shehan_n.cafe_management_system.auth.util.JwtUtil;
@@ -209,11 +210,45 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<String> changePassword(Map<String, String> requestdata) {
         try {
+            String currentUserEmail = tokenAuthenticationFilter.getCurrentUser();
+            User userObj = userRepository.findByEmail(currentUserEmail);
+
+            if (!userObj.equals(null)) {
+                if (userObj.getPassword().equals(requestdata.get("oldPassword"))) {
+                    userObj.setPassword(requestdata.get("newPassword"));
+                    userRepository.save(userObj);
+                    return Utils.getResponseEntity("Password Updated Successfully", HttpStatus.OK);
+                }
+                return Utils.getResponseEntity("Incorrect Old Password", HttpStatus.BAD_REQUEST);
+            }
+            return Utils.getResponseEntity(Constants.UNABLE_TO_FIND_USER, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return Utils.getResponseEntity(Constants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
+    @Override
+    public ResponseEntity<String> forgotPassword(Map<String, String> requestdata) {
+        try {
+            User userObj = userRepository.findByEmail(requestdata.get("email"));
+            if (!userObj.equals(null) && !Strings.isNullOrEmpty(userObj.getEmail())) {
+                emailUtils.forgotPasswordMail(userObj.getEmail(),"Credentials For Login", userObj.getPassword());
+                return Utils.getResponseEntity("CHECK YOUR MAILS FOR CREDENTIALS", HttpStatus.OK);
+            }
+            return Utils.getResponseEntity("USER NOT FOUND", HttpStatus.INTERNAL_SERVER_ERROR);
 
         }catch (Exception ex){
-
+            ex.printStackTrace();
+            if(ex instanceof NullPointerException){
+                return Utils.getResponseEntity("CANNOT FIND USER", HttpStatus.BAD_REQUEST);
+            }
+            return Utils.getResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
+        //return Utils.getResponseEntity(Constants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 
     private void sendMailToAllAdmins(String status, String userEmail, List<String> allAdmins) {
