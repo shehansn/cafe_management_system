@@ -1,5 +1,6 @@
 package com.sn.shehan_n.cafe_management_system.serviceImpl;
 
+import com.google.common.base.Strings;
 import com.sn.shehan_n.cafe_management_system.auth.filter.TokenAuthenticationFilter;
 import com.sn.shehan_n.cafe_management_system.auth.service.CustomUserDetailsService;
 import com.sn.shehan_n.cafe_management_system.auth.util.JwtUtil;
@@ -226,6 +227,27 @@ public class UserServiceImpl implements UserService {
             ex.printStackTrace();
         }
         return Utils.getResponseEntity(Constants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
+    @Override
+    public ResponseEntity<String> forgotPassword(Map<String, String> requestdata) {
+        try {
+            User userObj = userRepository.findByEmail(requestdata.get("email"));
+            if (!userObj.equals(null) && !Strings.isNullOrEmpty(userObj.getEmail())) {
+                emailUtils.forgotPasswordMail(userObj.getEmail(),"Credentials For Login", userObj.getPassword());
+                return Utils.getResponseEntity("CHECK YOUR MAILS FOR CREDENTIALS", HttpStatus.OK);
+            }
+            return Utils.getResponseEntity("USER NOT FOUND", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+            if(ex instanceof NullPointerException){
+                return Utils.getResponseEntity("CANNOT FIND USER", HttpStatus.BAD_REQUEST);
+            }
+            return Utils.getResponseEntity(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        //return Utils.getResponseEntity(Constants.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 

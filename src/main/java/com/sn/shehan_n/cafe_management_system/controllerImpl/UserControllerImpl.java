@@ -92,5 +92,16 @@ public class UserControllerImpl implements UserController {
 
     }
 
+    @Override
+    public ResponseEntity<String> forgotPassword(Map<String, String> requestdata) {
+        try {
+            return userService.forgotPassword(requestdata);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return Utils.getResponseEntity(Constants.UNABLE_TO_CHANGE_PASSWORD,HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
 
 }
