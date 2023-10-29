@@ -2,10 +2,7 @@ package com.sn.shehan_n.cafe_management_system.controller;
 
 import com.sn.shehan_n.cafe_management_system.wrapper.ProductWrapper;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -21,4 +18,10 @@ public interface ProductController {
 
     @PostMapping(path = "/update")
     ResponseEntity<String> updateProduct(@RequestBody Map<String ,String> requestData);
+
+    @DeleteMapping(path = "/delete/{id}")
+    ResponseEntity<String> deleteProduct(@PathVariable Integer id);
+
+    @PostMapping(path = "/updateStatus")
+    ResponseEntity<String> updateStatus(@RequestBody Map<String ,String> requestData);
 }
