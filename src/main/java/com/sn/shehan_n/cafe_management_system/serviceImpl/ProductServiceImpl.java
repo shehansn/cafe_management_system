@@ -69,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
                         return Utils.getResponseEntity("PRODUCT UPDATED SUCCESSFULLY", HttpStatus.OK);
                     }
                     else{
-                        return Utils.getResponseEntity("PRODUCT ID DOESNT EXISTS", HttpStatus.OK);
+                        return Utils.getResponseEntity("PRODUCT DOESNT EXISTS", HttpStatus.OK);
                     }
 
                 }
@@ -81,6 +81,50 @@ public class ProductServiceImpl implements ProductService {
             ex.printStackTrace();
         }
         return Utils.getResponseEntity("ERROR WHEN UPDATING PRODUCT ", HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
+    @Override
+    public ResponseEntity<String> deleteProduct(Integer id) {
+        try {
+            if (tokenAuthenticationFilter.isAdmin()) {
+                Optional<Product> productObj = productRepository.findById(id);
+                if(!productObj.isEmpty()){
+                    productRepository.deleteById(id);
+                    return Utils.getResponseEntity("PRODUCT DELETED SUCCESSFULLY", HttpStatus.OK);
+                }else{
+                    return Utils.getResponseEntity("PRODUCT DOESNT EXISTS", HttpStatus.OK);
+                }
+
+            }else{
+                return Utils.getResponseEntity(Constants.UNAUTHERIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return Utils.getResponseEntity("ERROR WHEN DELETING PRODUCT ", HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
+    @Override
+    public ResponseEntity<String> updateStatus(Map<String, String> requestData) {
+        try {
+            if (tokenAuthenticationFilter.isAdmin()) {
+                Optional<Product> productObj = productRepository.findById(Integer.parseInt(requestData.get("id")));
+                if(!productObj.isEmpty()){
+                    productRepository.updateProductStatus(Integer.parseInt(requestData.get("id")),requestData.get("status"));
+                    return Utils.getResponseEntity("PRODUCT STATUS UPDATED SUCCESSFULLY", HttpStatus.OK);
+                }
+                else{
+                    return Utils.getResponseEntity("PRODUCT DOESNT EXISTS", HttpStatus.OK);
+                }
+            }else{
+                return Utils.getResponseEntity(Constants.UNAUTHERIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return Utils.getResponseEntity("ERROR WHEN UPDATING PRODUCT STATUS", HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
 
