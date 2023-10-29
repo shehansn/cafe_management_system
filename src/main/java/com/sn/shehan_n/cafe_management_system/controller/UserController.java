@@ -17,7 +17,7 @@ public interface UserController {
     @PostMapping(path = "/login")
     public ResponseEntity<String> login(@RequestBody(required = true) Map<String,String> requestMapping);
 
-    @GetMapping(path = "getAllUsers")
+    @GetMapping(path = "/getAllUsers")
     public ResponseEntity<List<UserWrapper>> getAllUsers();
 
     @PutMapping(path = "/update")
