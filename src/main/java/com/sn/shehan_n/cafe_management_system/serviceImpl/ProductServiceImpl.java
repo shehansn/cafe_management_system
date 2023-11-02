@@ -128,6 +128,28 @@ public class ProductServiceImpl implements ProductService {
 
     }
 
+    @Override
+    public ResponseEntity<List<ProductWrapper>> getProductByCategoryId(Integer id) {
+        try {
+            return new ResponseEntity<>(productRepository.getProductByCategoryId(id),HttpStatus.OK);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<List<ProductWrapper>> getProductById(Integer id) {
+        try {
+//            return new ResponseEntity<>(productRepository.getProductById(id),HttpStatus.OK);
+            return new ResponseEntity<>(productRepository.getProductById(id),HttpStatus.OK);
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private Product getProductFromMap(Map<String, String> requestData, boolean isUpdate) {
         Category category = new Category();
         category.setId(Integer.parseInt(requestData.get("categoryId")));

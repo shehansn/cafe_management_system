@@ -24,4 +24,10 @@ public interface ProductController {
 
     @PostMapping(path = "/updateStatus")
     ResponseEntity<String> updateStatus(@RequestBody Map<String ,String> requestData);
+
+    @GetMapping(path = "/getProductByCategoryId/{id}")
+    ResponseEntity<List<ProductWrapper>> getProductByCategoryId(@PathVariable Integer id);
+
+    @GetMapping(path = "/getProductById/{id}")
+    ResponseEntity<List<ProductWrapper>> getProductById(@PathVariable Integer id);
 }
