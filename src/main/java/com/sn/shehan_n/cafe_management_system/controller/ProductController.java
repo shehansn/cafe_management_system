@@ -30,4 +30,5 @@ public interface ProductController {
 
     @GetMapping(path = "/getProductById/{id}")
     ResponseEntity<List<ProductWrapper>> getProductById(@PathVariable Integer id);
+
 }
