@@ -13,4 +13,5 @@ public class Constants {
     public static final String UNABLE_TO_FIND_USER ="UNABLE_TO_FIND_USER" ;
 
 
+    public static final String STORE_LOCATION = "E:\\01 Projects\\Cafe_management_system_angular_spring_boot\\project new\\Bills";
 }

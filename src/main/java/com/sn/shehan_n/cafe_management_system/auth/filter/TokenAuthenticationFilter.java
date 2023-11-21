@@ -74,6 +74,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     public String getCurrentUser(){
+        log.info(userName);
         return userName;
     }
 
